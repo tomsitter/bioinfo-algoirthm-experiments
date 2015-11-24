@@ -16,10 +16,10 @@ import random
 from collections import defaultdict
 import sys, getopt
 
-def main(argv, n=5000, k=5, choices='actg', count_compliments=False):
+def main(argv, n=5000, k=5, choices='ACTG', filename='', count_compliments=False):
 
     try:
-        opts, args = getopt.getopt(argv, 'n:k:h', ['choices=', 'help', 'compliment'])
+        opts, args = getopt.getopt(argv, 'n:k:h', ['filename=', 'seq=', 'choices=', 'help', 'compliment'])
     except getopt.GetoptError as err:
         print str(err)
         usage()
@@ -30,10 +30,12 @@ def main(argv, n=5000, k=5, choices='actg', count_compliments=False):
             n = int(a)
         elif o == '-k':
             k = int(a)
-        elif o == '--choices':
-            choices = a
+        elif o == '--filename':
+            filename = a
         elif o == '--compliment':
             count_compliments = True
+        elif o =='--seq':
+            seq = a
         elif o in ('-h', '--help'):
             usage()
             sys.exit()
@@ -41,11 +43,20 @@ def main(argv, n=5000, k=5, choices='actg', count_compliments=False):
             print o, a
             assert False, 'Unhandled option'
 
-    seq = "".join(random.choice(choices) for _ in range(n))
+    if filename:
+        with open(filename) as f:
+            lines = f.readlines()
+            seq = lines[0].rstrip()
+            k = int(lines[1])
+
+    if not seq:
+        seq = "".join(random.choice(choices) for _ in range(n))
+
     matches = defaultdict(int)
 
     #Go from the first element to the n-kth element
     #Count everytime this pattern has been seen before
+    seq = 'TAAACGTGAGAGAAACGTGCTGATTACACTTGTTCGTGTGGTAT'
     for i in range(0, len(seq)-k+1):
         matches[seq[i:i+k]] += 1
 
@@ -56,16 +67,16 @@ def main(argv, n=5000, k=5, choices='actg', count_compliments=False):
     print 'Most frequent'
     most_frequent = [(key, value) for key, value in matches.items() if value==max_count]
 
-    for k, v in most_frequent:
-        print k, ':', v
+    print " ".join(k for k,v in most_frequent)
 
-    print 'Reverse compliments'
-    compliments = count_compliments(most_frequent, seq)
-    for k, v in compliments:
-        print k, ':', v
+    if count_compliments:
+        print 'Reverse compliments'
+        compliments = find_compliments(most_frequent, seq)
+        for k, v in compliments:
+            print k, ':', v
 
 
-def count_compliments(most_frequent, seq):
+def find_compliments(most_frequent, seq):
     compliments = []
     for key, value in most_frequent:
         #reverse
