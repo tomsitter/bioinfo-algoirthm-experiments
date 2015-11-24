@@ -10,10 +10,13 @@ def reverse_complement(seq):
 
     return comp
 
-def all_occurences(pattern, seq):
+def list_occurences(pattern, seq):
     '''Return list of all occurences of a pattern in a sequence'''
     occurences = []
     for i, _ in enumerate(seq):
         if seq[i:i+len(pattern)] == pattern:
            occurences.append(i)
     return occurences
+
+def count_occurences(pattern, seq):
+    return len(list_occurences(pattern, seq))
