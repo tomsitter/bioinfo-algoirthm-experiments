@@ -56,7 +56,6 @@ def main(argv, n=5000, k=5, choices='ACTG', filename='', count_compliments=False
 
     #Go from the first element to the n-kth element
     #Count everytime this pattern has been seen before
-    seq = 'TAAACGTGAGAGAAACGTGCTGATTACACTTGTTCGTGTGGTAT'
     for i in range(0, len(seq)-k+1):
         matches[seq[i:i+k]] += 1
 
