@@ -23,9 +23,15 @@ class Profile:
         self.create_profile()
 
     def __str__(self):
-        output = "motif: {motif}\nprofile:\n".format(motif = "".join(self.motif))
+        '''print motif and sequences in Profile'''
+        profile=""
         for sequence in self.profile:
-            output += "".join(sequence) + "\n"
+            profile += "".join(sequence) + "\n"
+
+        output = "motif:\n{motif}\nprofile:\n{profile}".format(
+            motif = "".join(self.motif),
+            profile = profile)
+        
         return output
 
     def create_profile(self):
