@@ -51,13 +51,8 @@ def main(argv, n=5000, k=5, choices='ACTG', filename='', count_compliments=False
 
     if not seq:
         seq = "".join(random.choice(choices) for _ in range(n))
-
-    matches = defaultdict(int)
-
-    #Go from the first element to the n-kth element
-    #Count everytime this pattern has been seen before
-    for i in range(0, len(seq)-k+1):
-        matches[seq[i:i+k]] += 1
+    
+    matches = find_kmers(seq, k)
 
     #By caching this line you can improve performance 10x
     max_count = max(matches.values())
@@ -73,6 +68,53 @@ def main(argv, n=5000, k=5, choices='ACTG', filename='', count_compliments=False
         compliments = find_compliments(most_frequent, seq)
         for k, v in compliments:
             print k, ':', v
+
+
+def read_clump_file(filename):
+    data = open(filename).readlines()
+    sequence = data[0].rstrip()
+    k, L, t = data[1].rstrip().split(" ")
+    return sequence, int(k), int(L), int(t)
+
+def find_kmers(sequence, k):
+    matches = defaultdict(int)
+
+    #Go from the first element to the n-kth element
+    #Count everytime this pattern has been seen before
+    for i in range(0, len(sequence)-k+1):
+        matches[sequence[i:i+k]] += 1
+
+    return matches
+
+def find_kmers_in_window(sequence, k, L, t):
+    frequent_patterns = {}
+
+    #Find count of all kmers in window of length L
+    matches = find_kmers(sequence[0:L], k)
+
+    #If there are more than t kmers, save it
+    for match, count in matches.items():
+        if count >= t:
+            frequent_patterns[match] = 1
+
+    #Now move through the rest of the sequence 
+    for i in range(1, len(sequence) - L):
+
+        #Get the first kmer in the last window and decrease count by 1
+        first_pattern = sequence[i-1:k]
+        matches[first_pattern] -= 1
+
+        #Get the last pattern in this sequence
+        last_pattern = sequence[i+L-k:i+L]
+
+        #Increment it's count by 1
+        matches[last_pattern] += 1
+
+        #If this brings it over t, save it
+        if matches[last_pattern] >= t:
+           frequent_patterns[last_pattern] = 1
+
+    return frequent_patterns.keys()
 
 
 def find_compliments(most_frequent, seq):
